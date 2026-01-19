@@ -1,0 +1,51 @@
+{
+  "name": "opendesk",
+  "version": "v1",
+  "author": "Codesphere",
+  "category": "Workplace",
+  "description": "A open-source digital workplace suite",
+  "displayName": "OpenDesk",
+  "iconUrl": "https://docs.opendesk.eu/_astro/openDesk-logo-rgb-white.NR9llLex_1CX44A.svg",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "CS_COLLABORA_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_CRYPTPAD_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_ELEMENT_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_JITSI_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_OPENPROJECT_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_OXAPPSUITE_ENABLED": {
+        "type": "boolean"
+      },
+      "CS_XWIKI_ENABLED": {
+        "type": "boolean"
+      }
+    }
+  },
+  "detailsSchema": {},
+  "secretsSchema": {},
+  "plans": [
+    {
+      "id": 0,
+      "name": "Default",
+      "description": "Default Plan",
+      "parameters": {}
+    }
+  ],
+  "backend": {
+    "landscape": {
+      "gitUrl": "https://github.com/codesphere-cloud/csa-opendesk.git",
+      "ciProfile": "default"
+    }
+  }
+}
