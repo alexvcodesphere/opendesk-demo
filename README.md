@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OpenDesk Portal
+
+A German government-styled portal for deploying and managing OpenDesk sovereign office solutions via the Codesphere Managed Services API.
+
+## Overview
+
+OpenDesk Portal provides a clean, professional interface for managing OpenDesk deployments - a suite of open-source office tools including video conferencing, wikis, document collaboration, and more.
+
+## Features
+
+- 🏛️ **German Government Aesthetic** - Bundesdesign-inspired UI with official styling
+- 📦 **Service Management** - Create, edit, and delete OpenDesk instances
+- 🧩 **Module Selection** - Enable/disable individual modules (Jitsi, XWiki, CryptPad, etc.)
+- 🔄 **Real-time Status** - Live service status with automatic refresh
+- 💾 **Local Caching** - Instant page loads with background updates
+- 🔐 **API Authentication** - Secure token-based access to Codesphere API
+
+## Components
+
+| Component            | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `Header`             | Navigation with authentication status           |
+| `ModuleGrid`         | Main layout with service list and create button |
+| `ServiceAccordion`   | Expandable service cards with module tiles      |
+| `CreateServiceModal` | Modal for creating/editing OpenDesk services    |
+| `DetailsModal`       | View raw service details from API               |
+
+## Modules
+
+The following OpenDesk modules can be enabled per service:
+
+- **Jitsi Meet** - Video conferencing
+- **XWiki** - Knowledge base
+- **Element** - Matrix chat
+- **CryptPad** - Collaborative documents
+- **Collabora** - Office suite
+- **OX App Suite** - Email & calendar
+- **OpenProject** - Project management
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- npm or yarn
+- Codesphere API access
+
+### Environment Variables
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_CS_TOKEN=your_api_token_here
+NEXT_PUBLIC_CS_TEAM_ID=your_team_id
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Start development server
+npm run dev
+```
 
-## Learn More
+The app will be available at `http://localhost:3000`
 
-To learn more about Next.js, take a look at the following resources:
+### Production Build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Vanilla CSS with CSS Variables
+- **State**: React useState/useEffect with localStorage caching
+- **API**: Codesphere Managed Services REST API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Endpoints Used
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `GET /managed-services/providers` - List available providers
+- `GET /managed-services?team={id}` - List deployed services
+- `POST /managed-services` - Create new service
+- `PATCH /managed-services/{id}` - Update service config
+- `DELETE /managed-services/{id}` - Remove service
+- `GET /managed-services/{id}/details` - Get service connection details
+
+## License
+
+Demo application for Codesphere GmbH
