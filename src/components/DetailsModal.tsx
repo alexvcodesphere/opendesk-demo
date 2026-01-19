@@ -87,7 +87,7 @@ export function DetailsModal({ service, provider, onClose }: DetailsModalProps) 
               {service.name}
             </h2>
             <p className="text-sm text-gray-500">
-              {provider?.displayName || service.provider} v{service.providerVersion}
+              {provider?.displayName || (typeof service.provider === 'string' ? service.provider : service.provider?.name)} v{typeof service.provider === 'string' ? service.providerVersion : service.provider?.version}
             </p>
           </div>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(service.status.state)}`}>
