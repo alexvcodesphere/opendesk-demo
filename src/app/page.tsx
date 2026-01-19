@@ -171,7 +171,7 @@ export default function Dashboard() {
     provider: string;
     providerVersion: string;
     plan: { id: number };
-    config: Record<string, boolean>;
+    config: Record<string, boolean | string>;
   }) => {
     await deployService({
       ...payload,
