@@ -71,8 +71,11 @@ export function CreateServiceModal({ onClose, onDeploy, editingService, onUpdate
     if (editingService?.config) {
       const config: Record<string, boolean> = {};
       for (const [key, value] of Object.entries(editingService.config)) {
-        if (typeof value === 'boolean') {
-          config[key] = value;
+        // Handle both boolean true and string "true" from the API
+        if (value === true || value === 'true') {
+          config[key] = true;
+        } else if (value === false || value === 'false') {
+          config[key] = false;
         }
       }
       return config;

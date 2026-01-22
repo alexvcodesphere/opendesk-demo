@@ -37,13 +37,15 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-const MODULE_METADATA: Record<string, { name: string; urlPath: string; description: string }> = {
-  'CS_FILES_ENABLED': { name: 'Files', urlPath: 'files', description: 'Nextcloud, Collabora, CryptPad' },
-  'CS_MAIL_ENABLED': { name: 'Mail', urlPath: 'mail', description: 'E-Mail & Kalender' },
-  'CS_CHAT_ENABLED': { name: 'Chat', urlPath: 'element', description: 'Element/Matrix' },
-  'CS_VIDEO_ENABLED': { name: 'Video', urlPath: 'jitsi', description: 'Videokonferenzen' },
-  'CS_PROJECTS_ENABLED': { name: 'Projekte', urlPath: 'project', description: 'OpenProject' },
-  'CS_KNOWLEDGE_ENABLED': { name: 'Wissen', urlPath: 'wiki', description: 'XWiki' },
+// OpenDesk subdomain mapping based on default host configuration
+// URL format: https://{subdomain}.{baseDomain}
+const MODULE_METADATA: Record<string, { name: string; subdomain: string; description: string }> = {
+  'CS_FILES_ENABLED': { name: 'Files', subdomain: 'files', description: 'Nextcloud, Collabora, CryptPad' },
+  'CS_MAIL_ENABLED': { name: 'Mail', subdomain: 'webmail', description: 'E-Mail & Kalender' },
+  'CS_CHAT_ENABLED': { name: 'Chat', subdomain: 'chat', description: 'Element/Matrix' },
+  'CS_VIDEO_ENABLED': { name: 'Video', subdomain: 'meet', description: 'Videokonferenzen (Jitsi)' },
+  'CS_PROJECTS_ENABLED': { name: 'Projekte', subdomain: 'projects', description: 'OpenProject' },
+  'CS_KNOWLEDGE_ENABLED': { name: 'Wissen', subdomain: 'wiki', description: 'XWiki' },
 };
 
 interface ServiceAccordionProps {
@@ -67,31 +69,38 @@ export function ServiceAccordion({
 }: ServiceAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
-  // Get enabled modules
+  // Get base domain from service config (DOMAIN field)
+  const getBaseDomain = (): string => {
+    // Check config for DOMAIN value
+    if (service.config && typeof service.config['DOMAIN'] === 'string') {
+      return service.config['DOMAIN'];
+    }
+    // Fallback to details if available
+    if (details && typeof details['hostname'] === 'string') {
+      // Extract domain from hostname URL
+      const hostname = details['hostname'] as string;
+      return hostname.replace(/^https?:\/\//, '');
+    }
+    // Last resort fallback
+    return `${service.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.opendesk.example.com`;
+  };
+
+  const baseDomain = getBaseDomain();
+
+  // Get enabled modules with proper subdomain URLs
   const enabledModules = Object.entries(service.config || {})
-    .filter(([, value]) => value === true)
+    .filter(([, value]) => value === true || value === 'true')
     .map(([key]) => {
       const meta = MODULE_METADATA[key];
       if (!meta) return null;
       
-      // Get hostname from details (API returns lowercase 'hostname')
-      let hostname = '';
-      if (details && typeof details['hostname'] === 'string') {
-        hostname = details['hostname'];
-      } else if (details && typeof details['HOSTNAME'] === 'string') {
-        hostname = details['HOSTNAME'] as string;
-      } else {
-        const baseHost = service.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        hostname = `https://${baseHost}.opendesk.gov.de`;
-      }
-      
       return {
         ...meta,
         key,
-        url: `${hostname}/${meta.urlPath}`
+        url: `https://${meta.subdomain}.${baseDomain}`
       };
     })
-    .filter(Boolean) as Array<{ name: string; urlPath: string; description: string; key: string; url: string }>;
+    .filter(Boolean) as Array<{ name: string; subdomain: string; description: string; key: string; url: string }>;
 
   const getStatusDotClass = () => {
     const state = service.status.state;

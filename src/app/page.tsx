@@ -173,8 +173,19 @@ export default function Dashboard() {
     plan: { id: number };
     config: Record<string, boolean | string>;
   }) => {
+    // Convert boolean values to strings for API compatibility
+    const stringConfig: Record<string, string> = {};
+    for (const [key, value] of Object.entries(payload.config)) {
+      if (typeof value === 'boolean') {
+        stringConfig[key] = value ? 'true' : 'false';
+      } else {
+        stringConfig[key] = value;
+      }
+    }
+    
     await deployService({
       ...payload,
+      config: stringConfig,
       plan: payload.plan,
     });
     
@@ -221,7 +232,13 @@ export default function Dashboard() {
   };
 
   const handleUpdate = async (id: string, config: Record<string, boolean>) => {
-    const updatedService = await updateService(id, { config });
+    // Convert boolean values to strings for API compatibility
+    const stringConfig: Record<string, string> = {};
+    for (const [key, value] of Object.entries(config)) {
+      stringConfig[key] = value ? 'true' : 'false';
+    }
+    
+    const updatedService = await updateService(id, { config: stringConfig });
     setDeployedServices((prev) => {
       const updated = prev.map((s) => (s.id === id ? updatedService : s));
       localStorage.setItem('opengov_services', JSON.stringify(updated));

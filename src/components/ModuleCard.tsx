@@ -19,86 +19,82 @@ export function ModuleCard({ provider, deployed, details, onDeploy, onRemove, on
   const version = deployed?.providerVersion || provider?.version;
   const category = provider?.category;
   const iconUrl = provider?.iconUrl;
-  // Module metadata with icons and URL patterns
-  const moduleMetadata: Record<string, { name: string; icon: string; urlPath: string; description: string }> = {
-    'CS_JITSI_ENABLED': { 
-      name: 'Jitsi Meet', 
-      icon: '🎥', 
-      urlPath: 'jitsi',
-      description: 'Videokonferenzen'
+  // OpenDesk subdomain mapping based on default host configuration
+  // URL format: https://{subdomain}.{baseDomain}
+  const moduleMetadata: Record<string, { name: string; icon: string; subdomain: string; description: string }> = {
+    'CS_FILES_ENABLED': { 
+      name: 'Files', 
+      icon: '📁', 
+      subdomain: 'files',
+      description: 'Nextcloud'
     },
-    'CS_XWIKI_ENABLED': { 
-      name: 'XWiki', 
-      icon: '📚', 
-      urlPath: 'wiki',
-      description: 'Wissensdatenbank'
-    },
-    'CS_ELEMENT_ENABLED': { 
-      name: 'Element', 
-      icon: '💬', 
-      urlPath: 'element',
-      description: 'Matrix Chat'
-    },
-    'CS_CRYPTPAD_ENABLED': { 
-      name: 'CryptPad', 
-      icon: '📝', 
-      urlPath: 'cryptpad',
-      description: 'Dokumente'
-    },
-    'CS_COLLABORA_ENABLED': { 
-      name: 'Collabora', 
-      icon: '📊', 
-      urlPath: 'collabora',
-      description: 'Office Suite'
-    },
-    'CS_OXAPPSUITE_ENABLED': { 
-      name: 'OX App Suite', 
+    'CS_MAIL_ENABLED': { 
+      name: 'Mail', 
       icon: '📧', 
-      urlPath: 'mail',
+      subdomain: 'webmail',
       description: 'E-Mail & Kalender'
     },
-    'CS_OPENPROJECT_ENABLED': { 
-      name: 'OpenProject', 
+    'CS_CHAT_ENABLED': { 
+      name: 'Chat', 
+      icon: '💬', 
+      subdomain: 'chat',
+      description: 'Element/Matrix'
+    },
+    'CS_VIDEO_ENABLED': { 
+      name: 'Video', 
+      icon: '🎥', 
+      subdomain: 'meet',
+      description: 'Jitsi Meet'
+    },
+    'CS_PROJECTS_ENABLED': { 
+      name: 'Projekte', 
       icon: '📋', 
-      urlPath: 'project',
-      description: 'Projektmanagement'
+      subdomain: 'projects',
+      description: 'OpenProject'
+    },
+    'CS_KNOWLEDGE_ENABLED': { 
+      name: 'Wissen', 
+      icon: '📚', 
+      subdomain: 'wiki',
+      description: 'XWiki'
     },
   };
 
-  // Get hostname from service details (HOSTNAME field)
-  const getHostname = (): string => {
+  // Get base domain from service config (DOMAIN field)
+  const getBaseDomain = (): string => {
     if (!deployed) return '';
     
-    // Debug: log the details to see what we have
-    console.log('Service details for', deployed.name, ':', details);
-    
-    if (details && typeof details['HOSTNAME'] === 'string') {
-      return details['HOSTNAME'] as string;
+    // Check config for DOMAIN value
+    if (deployed.config && typeof deployed.config['DOMAIN'] === 'string') {
+      return deployed.config['DOMAIN'];
     }
-    
-    // Fallback: generate from service name
-    const baseHost = deployed.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    return `https://${baseHost}.opendesk.gov.de`;
+    // Fallback to details if available
+    if (details && typeof details['hostname'] === 'string') {
+      const hostname = details['hostname'] as string;
+      return hostname.replace(/^https?:\/\//, '');
+    }
+    // Last resort fallback
+    return `${deployed.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.opendesk.example.com`;
   };
 
-  // Get enabled submodules with URLs
+  // Get enabled submodules with proper subdomain URLs
   const getEnabledSubmodules = () => {
     if (!deployed?.config) return [];
     
-    const hostname = getHostname();
+    const baseDomain = getBaseDomain();
     
     return Object.entries(deployed.config)
-      .filter(([, value]) => value === true)
+      .filter(([, value]) => value === true || value === 'true')
       .map(([key]) => {
         const meta = moduleMetadata[key];
         if (!meta) return null;
         return {
           ...meta,
           key,
-          url: `${hostname}/${meta.urlPath}`
+          url: `https://${meta.subdomain}.${baseDomain}`
         };
       })
-      .filter(Boolean) as Array<{ name: string; icon: string; urlPath: string; description: string; key: string; url: string }>;
+      .filter(Boolean) as Array<{ name: string; icon: string; subdomain: string; description: string; key: string; url: string }>;
   };
 
   const enabledSubmodules = getEnabledSubmodules();
