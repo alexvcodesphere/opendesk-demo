@@ -123,16 +123,30 @@ export function DetailsModal({ service, provider, onClose }: DetailsModalProps) 
             
             <div className="connection-info space-y-3">
               {Object.entries(details).map(([key, value]) => {
-                if (value === null || value === undefined || typeof value === 'object') return null;
+                // Skip null/undefined values
+                if (value === null || value === undefined) return null;
+                
+                // Handle nested secrets object
+                if (key === 'secrets' && typeof value === 'object') {
+                  return null; // Will be rendered in dedicated secrets section below
+                }
+                
+                // Handle nested links object
+                if (key === 'links' && typeof value === 'object') {
+                  return null; // Will be rendered in dedicated links section below
+                }
+                
+                // Skip other objects
+                if (typeof value === 'object') return null;
+                
                 const stringValue = String(value);
-                const isSecret = key.toLowerCase().includes('password') || key.toLowerCase().includes('secret');
                 
                 return (
                   <div key={key} className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">{key}</span>
                       <p className="font-mono text-sm truncate">
-                        {isSecret ? '••••••••' : stringValue}
+                        {stringValue}
                       </p>
                     </div>
                     <button
@@ -159,6 +173,144 @@ export function DetailsModal({ service, provider, onClose }: DetailsModalProps) 
                 );
               })}
             </div>
+
+            {/* Links Section */}
+            {(() => {
+              const links = details.links as Record<string, unknown> | undefined;
+              if (!links || typeof links !== 'object' || Object.keys(links).length === 0) {
+                return null;
+              }
+              return (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="font-semibold text-[var(--gov-primary-dark)] mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    Links
+                  </h4>
+                  <div className="connection-info space-y-3 bg-blue-50/50 p-3 rounded-lg border border-blue-200">
+                    {Object.entries(links).map(([linkKey, linkValue]) => {
+                      if (linkValue === null || linkValue === undefined) return null;
+                      const stringValue = String(linkValue);
+                      const displayKey: string = linkKey
+                        .replace(/_/g, ' ')
+                        .split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                      
+                      return (
+                        <div key={linkKey} className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs text-blue-700 uppercase tracking-wide">{displayKey}</span>
+                            <a 
+                              href={stringValue}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block font-mono text-sm text-blue-600 hover:text-blue-800 hover:underline truncate"
+                            >
+                              {stringValue}
+                            </a>
+                          </div>
+                          <div className="flex gap-1">
+                            <a
+                              href={stringValue}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="copy-btn bg-blue-100 hover:bg-blue-200 text-blue-800"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                              Öffnen
+                            </a>
+                            <button
+                              onClick={() => copyToClipboard(linkKey, stringValue)}
+                              className="copy-btn bg-blue-100 hover:bg-blue-200 text-blue-800"
+                            >
+                              {copiedKey === linkKey ? (
+                                <>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Kopiert
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                  Kopieren
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Secrets Section */}
+            {(() => {
+              const secrets = details.secrets as Record<string, unknown> | undefined;
+              if (!secrets || typeof secrets !== 'object' || Object.keys(secrets).length === 0) {
+                return null;
+              }
+              return (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="font-semibold text-[var(--gov-primary-dark)] mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Zugangsdaten
+                  </h4>
+                  <div className="connection-info space-y-3 bg-amber-50/50 p-3 rounded-lg border border-amber-200">
+                    {Object.entries(secrets).map(([secretKey, secretValue]) => {
+                      if (secretValue === null || secretValue === undefined) return null;
+                      const stringValue = String(secretValue);
+                      const displayKey: string = secretKey
+                        .replace(/_/g, ' ')
+                        .split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                      
+                      return (
+                        <div key={secretKey} className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs text-amber-700 uppercase tracking-wide">{displayKey}</span>
+                            <p className="font-mono text-sm text-gray-800">
+                              ••••••••••••••••
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(secretKey, stringValue)}
+                            className="copy-btn bg-amber-100 hover:bg-amber-200 text-amber-800"
+                          >
+                            {copiedKey === secretKey ? (
+                              <>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Kopiert
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Kopieren
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
