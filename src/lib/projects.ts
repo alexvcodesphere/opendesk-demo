@@ -63,8 +63,10 @@ export async function activateProject(
   // Deploy each service
   for (const provider of enabledProviders) {
     try {
+      // Generate a unique 5-char ID for this service
+      const uniqueId = Math.random().toString(36).substring(2, 7);
       const payload: DeployServicePayload = {
-        name: `[OPENAPPS] [${project.name}]-${provider.name}`,
+        name: `[${uniqueId}] [${project.name}]-${provider.name}`,
         provider: provider.name,
         providerVersion: provider.version,
         plan: { id: 0 },
@@ -136,8 +138,10 @@ export async function addServiceToProject(
   }
   
   try {
+    // Generate a unique 5-char ID for this service
+    const uniqueId = Math.random().toString(36).substring(2, 7);
     const payload: DeployServicePayload = {
-      name: `[OPENAPPS] [${project.name}]-${provider.name}`,
+      name: `[${uniqueId}] [${project.name}]-${provider.name}`,
       provider: provider.name,
       providerVersion: provider.version,
       plan: { id: 0 },

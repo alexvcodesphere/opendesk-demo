@@ -34,7 +34,8 @@ export default function Dashboard() {
       setIsLoading(true);
       try {
         const providersData = await listProviders();
-        setProviders(providersData);
+        // Filter out opendesk provider
+        setProviders(providersData.filter((p) => p.name !== 'opendesk'));
         if (isAuthenticated && teamId) {
           const servicesData = await listServices();
           setDeployedServices(servicesData);
