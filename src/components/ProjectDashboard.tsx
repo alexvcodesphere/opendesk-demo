@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { Project, ProjectService } from '@/lib/projects';
 import { ServiceProvider, DeployedService } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AddServicePicker } from './AddServicePicker';
 import { LayoutGrid, Zap, Bell, Search, ExternalLink, Trash2, Plus, Info } from 'lucide-react';
 
 interface ProjectDashboardProps {
@@ -16,11 +18,16 @@ interface ProjectDashboardProps {
   onRemoveService: (serviceId: string) => void;
   onBackToCatalog: () => void;
   onDeleteProject?: () => void;
-  onAddService?: () => void;
+  onAddService?: (provider: ServiceProvider) => Promise<void>;
   onServiceDetails?: (serviceId: string, details: Record<string, unknown>) => void;
 }
 
 export function ProjectDashboard({ project, services, deployedServices, serviceDetails, providers, onRemoveService, onBackToCatalog, onDeleteProject, onAddService, onServiceDetails }: ProjectDashboardProps) {
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  
+  // Get providers that are NOT already added to this project
+  const existingProviderNames = new Set(services.map(s => s.providerName));
+  
   const enrichedServices = services.map((projectService) => {
     const deployed = deployedServices.find((d) => d.id === projectService.serviceId);
     const provider = providers.find((p) => p.name === projectService.providerName && p.version === projectService.providerVersion);
@@ -44,7 +51,7 @@ export function ProjectDashboard({ project, services, deployedServices, serviceD
         </div>
         <div className="flex items-center gap-2">
           {onAddService && (
-            <Button variant="outline" onClick={onAddService}>
+            <Button variant="outline" onClick={() => setIsAddServiceOpen(true)}>
               <Plus className="w-4 h-4 mr-2" /> Add Service
             </Button>
           )}
@@ -75,8 +82,30 @@ export function ProjectDashboard({ project, services, deployedServices, serviceD
             />
           ))}
         </div>
-        {services.length === 0 && (<div className="text-center py-12 text-muted-foreground"><p>No applications in this project yet.</p><Button variant="outline" className="mt-4" onClick={onAddService || onBackToCatalog}>Add Applications</Button></div>)}
+        {services.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <p>No applications in this project yet.</p>
+            {onAddService ? (
+              <Button variant="outline" className="mt-4" onClick={() => setIsAddServiceOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" /> Add Applications
+              </Button>
+            ) : (
+              <Button variant="outline" className="mt-4" onClick={onBackToCatalog}>Add Applications</Button>
+            )}
+          </div>
+        )}
       </div>
+
+      {onAddService && (
+        <AddServicePicker
+          open={isAddServiceOpen}
+          onOpenChange={setIsAddServiceOpen}
+          providers={providers}
+          excludeProviders={existingProviderNames}
+          onAddService={onAddService}
+          project={project}
+        />
+      )}
     </div>
   );
 }

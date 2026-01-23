@@ -8,7 +8,7 @@ import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { ProviderDetailsDialog } from '@/components/ProviderDetailsDialog';
 import { useAuth } from '@/context/AuthContext';
 import { ServiceProvider, DeployedService, listProviders, listServices, getServiceDetails } from '@/lib/api';
-import { getProjects, getProjectServices, createProject, activateProject, removeServiceFromProject, deleteProject, Project, ProjectService } from '@/lib/projects';
+import { getProjects, getProjectServices, createProject, activateProject, removeServiceFromProject, deleteProject, addServiceToProject, Project, ProjectService } from '@/lib/projects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -114,9 +114,15 @@ export default function Dashboard() {
     try {
       const project = await createProject(name);
       const enabledProvidersList = providers.filter((p) => enabledProviders.has(p.name));
+      
+      // Allow creating empty projects (no services selected)
       if (enabledProvidersList.length === 0) {
-        return { success: false, errors: ['No applications selected'] };
+        const updatedProjects = await getProjects();
+        setProjects(updatedProjects);
+        showNotification('success', `Project "${name}" created successfully (no applications)`);
+        return { success: true, projectId: project.id };
       }
+      
       const result = await activateProject(
         project.id,
         enabledProvidersList.map((p) => ({ name: p.name, version: p.version }))
@@ -141,6 +147,20 @@ export default function Dashboard() {
     const project = projects.find((p) => p.id === projectId);
     if (project) {
       setCurrentProject(project);
+    }
+  };
+
+  const handleAddServiceToProject = async (provider: ServiceProvider) => {
+    if (!currentProject) return;
+    const result = await addServiceToProject(currentProject.id, { name: provider.name, version: provider.version });
+    if (result.success) {
+      const services = await getProjectServices(currentProject.id);
+      setProjectServices(services);
+      const servicesData = await listServices();
+      setDeployedServices(servicesData);
+      showNotification('success', `Added ${provider.displayName} to project`);
+    } else {
+      showNotification('error', result.error || 'Failed to add service');
     }
   };
 
@@ -327,7 +347,7 @@ export default function Dashboard() {
             onRemoveService={handleRemoveService}
             onBackToCatalog={() => setCurrentProject(null)}
             onDeleteProject={handleDeleteProjectFromDashboard}
-            onAddService={() => setCurrentProject(null)}
+            onAddService={handleAddServiceToProject}
             onServiceDetails={handleServiceDetails}
           />
         ) : (

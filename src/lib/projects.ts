@@ -70,7 +70,7 @@ export async function activateProject(
       const uniqueId = Math.random().toString(36).substring(2, 7);
       const safeName = project.name.replace(/[^a-zA-Z0-9 ]/g, '').trim();
       const payload: DeployServicePayload = {
-        name: `${uniqueId} ${safeName} ${provider.name}`,
+        name: `${uniqueId}-${safeName}-${provider.name}`.toLowerCase(),
         provider: provider.name,
         providerVersion: provider.version,
         plan: { id: 0 },
@@ -162,7 +162,7 @@ export async function addServiceToProject(
     const uniqueId = Math.random().toString(36).substring(2, 7);
     const safeName = project.name.replace(/[^a-zA-Z0-9 ]/g, '').trim();
     const payload: DeployServicePayload = {
-      name: `${uniqueId} ${safeName} ${provider.name}`,
+      name: `${uniqueId}-${safeName}-${provider.name}`.toLowerCase(),
       provider: provider.name,
       providerVersion: provider.version,
       plan: { id: 0 },
