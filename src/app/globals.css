@@ -1,360 +1,183 @@
 @import "tailwindcss";
 
-/* Bundesdesign-Inspired Government Portal Design System */
 :root {
-  /* Official German Government Colors - inspired by Bundesdesign */
-  --gov-primary: #004B76;        /* Bundesblau - Official German government blue */
-  --gov-primary-dark: #003354;
-  --gov-primary-light: #0066A1;
-  --gov-accent: #C5003E;         /* Bundesrot - Official accent red */
-  --gov-accent-light: #E8194D;
-  --gov-gold: #C4A000;           /* Official gold for highlights */
+  /* Dark theme - OpenApps inspired */
+  --background: #0a0a0f;
+  --background-secondary: #111118;
+  --card-bg: #1a1a24;
+  --card-border: #2a2a3a;
   
-  /* Legacy aliases for compatibility */
-  --gov-blue: var(--gov-primary);
-  --gov-blue-dark: var(--gov-primary-dark);
-  --gov-blue-light: var(--gov-primary-light);
-
-  /* Neutral Palette - More formal grays */
-  --background: #F5F5F5;
-  --foreground: #1A1A1A;
-  --card-bg: #FFFFFF;
-  --card-border: #D4D4D4;
-  --muted: #525252;
-
-  /* Status Colors */
-  --status-active: #166534;
-  --status-pending: #B45309;
-  --status-inactive: #737373;
-  --status-creating: #0066A1;
-  --status-error: #B91C1C;
-
-  /* Spacing */
-  --header-height: 80px;
-  --border-radius: 4px;
+  /* Accent colors */
+  --accent-primary: #8b5cf6;
+  --accent-primary-light: #a78bfa;
+  --accent-primary-dark: #7c3aed;
+  
+  /* Status colors */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Text colors */
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  
+  /* Legacy gov colors (for compatibility) */
+  --gov-primary: #8b5cf6;
+  --gov-primary-light: #a78bfa;
+  --gov-primary-dark: #7c3aed;
+  --gov-accent: #22c55e;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-gov-blue: var(--gov-primary);
-  --color-gov-blue-dark: var(--gov-primary-dark);
-  --color-gov-blue-light: var(--gov-primary-light);
-  --color-gov-gold: var(--gov-accent);
-  --color-gov-gold-light: var(--gov-accent-light);
-  --color-card-bg: var(--card-bg);
-  --color-card-border: var(--card-border);
-  --font-sans: 'BundesSans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-/* Base Styles - More formal */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 15px;
+  color: var(--text-primary);
 }
 
-/* Card Component - Government formal style */
-.module-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--border-radius);
-  padding: 1.25rem;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.module-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 75, 118, 0.12);
-  border-color: var(--gov-primary);
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Status Indicators - Formal */
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  display: inline-block;
-  flex-shrink: 0;
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.status-dot.active {
-  background: var(--status-active);
-}
-
-.status-dot.pending,
-.status-dot.creating {
-  background: var(--status-creating);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.status-dot.inactive {
-  background: var(--status-inactive);
-}
-
-.status-dot.error {
-  background: var(--status-error);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Government Header - Official Bundesdesign inspired */
-.gov-header {
-  background: var(--gov-primary);
-  color: white;
-  padding: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
-
-.gov-header-inner {
-  padding: 1rem 2rem;
-  border-bottom: 4px solid var(--gov-accent);
-}
-
-/* Top bar stripe - Germany flag colors */
-.gov-stripe {
-  height: 4px;
-  background: linear-gradient(
-    to right,
-    #000000 33.33%,
-    #DD0000 33.33%,
-    #DD0000 66.66%,
-    #FFCC00 66.66%
-  );
-}
-
-/* Button Styles - More formal, less rounded */
-.btn-primary {
-  background: var(--gov-primary);
-  color: white;
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.15s ease;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.btn-primary:hover {
-  background: var(--gov-primary-light);
-}
-
-.btn-primary:active {
-  background: var(--gov-primary-dark);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--gov-primary);
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.15s ease;
-  border: 2px solid var(--gov-primary);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-secondary:hover {
-  background: rgba(0, 75, 118, 0.08);
-}
-
-.btn-gold {
-  background: var(--gov-accent);
-  color: white;
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.15s ease;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-gold:hover {
-  background: var(--gov-accent-light);
-}
-
-/* Category Badge - Official style */
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  background: var(--gov-primary);
-  color: white;
-  border-radius: 2px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Modal Overlay - Formal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  animation: fadeIn 0.15s ease;
-}
-
+/* shadcn animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.modal-content {
-  background: white;
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  max-width: 480px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.2s ease;
-  border-top: 4px solid var(--gov-primary);
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes zoomIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-/* Input Styles - Formal government style */
-.input-field {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  border: 2px solid var(--card-border);
-  border-radius: var(--border-radius);
-  font-size: 0.875rem;
-  transition: border-color 0.15s ease;
-  background: var(--card-bg);
+@keyframes zoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.95); opacity: 0; }
 }
 
-.input-field:focus {
-  outline: none;
-  border-color: var(--gov-primary);
+@keyframes slideInFromTop {
+  from { transform: translateY(-2%); }
+  to { transform: translateY(0); }
 }
 
-.input-field::placeholder {
-  color: var(--muted);
+@keyframes slideInFromBottom {
+  from { transform: translateY(2%); }
+  to { transform: translateY(0); }
 }
 
-/* Section Headers - Official document style */
-.section-header {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--gov-primary);
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--gov-primary);
+/* Tailwind animation utilities for shadcn */
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
 }
 
-/* Connection Info Styles */
-.connection-info {
-  background: #FAFAFA;
-  border: 2px solid var(--card-border);
-  border-left: 4px solid var(--gov-primary);
-  padding: 0.875rem;
-  font-family: 'Courier New', Consolas, monospace;
-  font-size: 0.8rem;
+.fade-in-0 {
+  animation-name: fadeIn;
 }
 
-.copy-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  background: var(--gov-primary);
-  color: white;
-  border-radius: 2px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s;
+.zoom-in-95 {
+  animation-name: zoomIn;
 }
 
-.copy-btn:hover {
-  background: var(--gov-primary-light);
+.slide-in-from-top-2 {
+  animation-name: slideInFromTop;
 }
 
-/* Scrollbar Styling */
+.slide-in-from-bottom-2 {
+  animation-name: slideInFromBottom;
+}
+
+.animate-out {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+}
+
+.fade-out-0 {
+  animation-name: fadeOut;
+}
+
+.zoom-out-95 {
+  animation-name: zoomOut;
+}
+
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #E5E5E5;
+  background: var(--background-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #A3A3A3;
-  border-radius: 0;
+  background: var(--card-border);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #737373;
+  background: var(--text-muted);
 }
 
-/* Line clamp utility */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Toast notifications */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  z-index: 50;
 }
 
-/* Official notice box */
-.gov-notice {
-  background: #FEF3C7;
-  border: 2px solid #D97706;
-  border-left: 4px solid #D97706;
-  padding: 1rem;
-  font-size: 0.875rem;
+.toast-success {
+  background: var(--success);
+  color: white;
 }
 
-/* Official info box */
-.gov-info {
-  background: #DBEAFE;
-  border: 2px solid var(--gov-primary);
-  border-left: 4px solid var(--gov-primary);
-  padding: 1rem;
-  font-size: 0.875rem;
+.toast-error {
+  background: var(--error);
+  color: white;
+}
+
+/* Focus ring utility */
+.focus-ring:focus-visible {
+  outline: none;
+  ring: 2px solid var(--accent-primary);
+  ring-offset: 2px;
+  ring-offset-color: var(--background);
 }
