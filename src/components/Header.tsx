@@ -3,13 +3,16 @@
 import { Project } from '@/lib/projects';
 import { Button } from '@/components/ui/button';
 import { ProjectSelector } from './ProjectSelector';
-import { User, Settings } from 'lucide-react';
+import { User, Settings, LogOut } from 'lucide-react';
 
 interface HeaderProps {
   projects: Project[];
   currentProject: Project | null;
   onSelectProject: (project: Project | null) => void;
   onCreateProject: () => void;
+  onDeleteProject?: (project: Project) => void;
+  userName?: string | null;
+  onLogout?: () => void;
 }
 
 export function Header({
@@ -17,6 +20,9 @@ export function Header({
   currentProject,
   onSelectProject,
   onCreateProject,
+  onDeleteProject,
+  userName,
+  onLogout,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -43,6 +49,7 @@ export function Header({
             currentProject={currentProject}
             onSelectProject={onSelectProject}
             onCreateProject={onCreateProject}
+            onDeleteProject={onDeleteProject}
           />
         </nav>
 
@@ -55,7 +62,12 @@ export function Header({
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
               <User className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-sm hidden sm:inline">Admin User</span>
+            <span className="text-sm hidden sm:inline">{userName || 'User'}</span>
+            {onLogout && (
+              <Button variant="ghost" size="icon" onClick={onLogout} title="Logout">
+                <LogOut className="w-4 h-4 text-muted-foreground" />
+              </Button>
+            )}
           </div>
         </div>
       </div>

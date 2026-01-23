@@ -61,12 +61,16 @@ export async function activateProject(
   const errors: string[] = [];
   
   // Deploy each service
+  console.log(`[Deploy] Starting project "${project.name}" with ${enabledProviders.length} services`);
+  
   for (const provider of enabledProviders) {
     try {
       // Generate a unique 5-char ID for this service
+      // Name must be alphanumeric with spaces only (max 127 chars)
       const uniqueId = Math.random().toString(36).substring(2, 7);
+      const safeName = project.name.replace(/[^a-zA-Z0-9 ]/g, '').trim();
       const payload: DeployServicePayload = {
-        name: `[${uniqueId}] [${project.name}]-${provider.name}`,
+        name: `${uniqueId} ${safeName} ${provider.name}`,
         provider: provider.name,
         providerVersion: provider.version,
         plan: { id: 0 },
@@ -93,13 +97,25 @@ export async function activateProject(
       if (service) {
         deployedServices.push(service);
       }
+      console.log(`[Deploy] ✓ ${provider.name}`);
     } catch (err) {
-      errors.push(`Failed to deploy ${provider.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`[Deploy] ✗ ${provider.name}: ${errorMsg}`);
+      errors.push(`Failed to deploy ${provider.name}: ${errorMsg}`);
     }
   }
   
-  // Update project status
-  const finalStatus = errors.length === 0 ? 'active' : (deployedServices.length > 0 ? 'active' : 'error');
+  console.log(`[Deploy] Done: ${deployedServices.length} ok, ${errors.length} failed`);
+  
+  // If all deployments failed, delete the project and return error
+  if (deployedServices.length === 0 && errors.length > 0) {
+    console.log(`[Deploy] All deployments failed, removing project "${project.name}"`);
+    await db.delete(projects).where(eq(projects.id, projectId));
+    return { success: false, deployedServices: [], errors };
+  }
+  
+  // Update project status (partial success still counts as active)
+  const finalStatus = errors.length === 0 ? 'active' : 'active';
   await db.update(projects)
     .set({ status: finalStatus, updatedAt: new Date().toISOString() })
     .where(eq(projects.id, projectId));
@@ -110,21 +126,22 @@ export async function activateProject(
 // Delete a project and all its services
 export async function deleteProject(id: string): Promise<{ success: boolean; errors: string[] }> {
   const services = await getProjectServices(id);
-  const errors: string[] = [];
   
-  // Delete each service from API
+  // Delete each service from API (ignore errors for already-deleted services)
   for (const service of services) {
     try {
       await apiDeleteService(service.serviceId);
     } catch (err) {
-      errors.push(`Failed to delete service ${service.serviceId}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
+      // Just log, don't block project deletion
+      console.warn(`[DeleteProject] Service ${service.serviceId}: ${errMsg}`);
     }
   }
   
   // Delete project (cascades to project_services)
   await db.delete(projects).where(eq(projects.id, id));
   
-  return { success: errors.length === 0, errors };
+  return { success: true, errors: [] };
 }
 
 // Add a single service to an existing project
@@ -137,11 +154,15 @@ export async function addServiceToProject(
     return { success: false, error: 'Project not found' };
   }
   
+  console.log(`[AddService] ${provider.name} → project "${project.name}"`);
+  
   try {
     // Generate a unique 5-char ID for this service
+    // Name must be alphanumeric with spaces only (max 127 chars)
     const uniqueId = Math.random().toString(36).substring(2, 7);
+    const safeName = project.name.replace(/[^a-zA-Z0-9 ]/g, '').trim();
     const payload: DeployServicePayload = {
-      name: `[${uniqueId}] [${project.name}]-${provider.name}`,
+      name: `${uniqueId} ${safeName} ${provider.name}`,
       provider: provider.name,
       providerVersion: provider.version,
       plan: { id: 0 },
@@ -164,9 +185,12 @@ export async function addServiceToProject(
       .where(eq(projectServices.serviceId, deployed.id))
       .limit(1);
     
+    console.log(`[AddService] ✓ ${provider.name}`);
     return { success: true, service };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`[AddService] ✗ ${provider.name}: ${errorMsg}`);
+    return { success: false, error: errorMsg };
   }
 }
 

@@ -5,7 +5,7 @@ import { ServiceProvider, DeployedService } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LayoutGrid, Zap, Bell, Search, ExternalLink, Trash2 } from 'lucide-react';
+import { LayoutGrid, Zap, Bell, Search, ExternalLink, Trash2, Plus, Info } from 'lucide-react';
 
 interface ProjectDashboardProps {
   project: Project;
@@ -15,9 +15,12 @@ interface ProjectDashboardProps {
   providers: ServiceProvider[];
   onRemoveService: (serviceId: string) => void;
   onBackToCatalog: () => void;
+  onDeleteProject?: () => void;
+  onAddService?: () => void;
+  onServiceDetails?: (serviceId: string, details: Record<string, unknown>) => void;
 }
 
-export function ProjectDashboard({ project, services, deployedServices, serviceDetails, providers, onRemoveService, onBackToCatalog }: ProjectDashboardProps) {
+export function ProjectDashboard({ project, services, deployedServices, serviceDetails, providers, onRemoveService, onBackToCatalog, onDeleteProject, onAddService, onServiceDetails }: ProjectDashboardProps) {
   const enrichedServices = services.map((projectService) => {
     const deployed = deployedServices.find((d) => d.id === projectService.serviceId);
     const provider = providers.find((p) => p.name === projectService.providerName && p.version === projectService.providerVersion);
@@ -28,11 +31,25 @@ export function ProjectDashboard({ project, services, deployedServices, serviceD
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome to {project.name}!</h1>
-          <p className="text-muted-foreground mt-1">Access your project applications</p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">{project.name}</h1>
+            <p className="text-muted-foreground mt-1">Access your project applications</p>
+          </div>
+          {onDeleteProject && (
+            <Button variant="ghost" size="icon" onClick={onDeleteProject} className="text-muted-foreground hover:text-destructive">
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
-        <Button variant="outline" onClick={onBackToCatalog}>Back to Catalog</Button>
+        <div className="flex items-center gap-2">
+          {onAddService && (
+            <Button variant="outline" onClick={onAddService}>
+              <Plus className="w-4 h-4 mr-2" /> Add Service
+            </Button>
+          )}
+          <Button variant="outline" onClick={onBackToCatalog}>Back to Catalog</Button>
+        </div>
       </div>
 
       <div className="relative max-w-md">
@@ -49,9 +66,16 @@ export function ProjectDashboard({ project, services, deployedServices, serviceD
       <div>
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><span className="w-1 h-5 bg-primary rounded-full" /> Your Applications</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {enrichedServices.map((service) => (<ServiceCard key={service.id} service={service} onRemove={() => onRemoveService(service.serviceId)} />))}
+          {enrichedServices.map((service) => (
+            <ServiceCard 
+              key={service.id} 
+              service={service} 
+              onRemove={() => onRemoveService(service.serviceId)} 
+              onDetails={service.details && onServiceDetails ? () => onServiceDetails(service.serviceId, service.details!) : undefined}
+            />
+          ))}
         </div>
-        {services.length === 0 && (<div className="text-center py-12 text-muted-foreground"><p>No applications in this project yet.</p><Button variant="outline" className="mt-4" onClick={onBackToCatalog}>Add Applications</Button></div>)}
+        {services.length === 0 && (<div className="text-center py-12 text-muted-foreground"><p>No applications in this project yet.</p><Button variant="outline" className="mt-4" onClick={onAddService || onBackToCatalog}>Add Applications</Button></div>)}
       </div>
     </div>
   );
@@ -61,7 +85,7 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number
   return (<div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card shadow-sm">{icon}<div><p className="text-2xl font-bold">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div></div>);
 }
 
-function ServiceCard({ service, onRemove }: { service: { id: number; serviceId: string; providerName: string; providerVersion: string; deployed?: DeployedService; provider?: ServiceProvider; details?: Record<string, unknown> }; onRemove: () => void }) {
+function ServiceCard({ service, onRemove, onDetails }: { service: { id: number; serviceId: string; providerName: string; providerVersion: string; deployed?: DeployedService; provider?: ServiceProvider; details?: Record<string, unknown> }; onRemove: () => void; onDetails?: () => void }) {
   const { provider, deployed, details } = service;
   const displayName = provider?.displayName || service.providerName;
   const description = provider?.description || 'Managed service application';
@@ -79,13 +103,16 @@ function ServiceCard({ service, onRemove }: { service: { id: number; serviceId: 
             <CardTitle className="text-base">{displayName}</CardTitle>
             <p className="text-xs text-muted-foreground">{isActive ? (<span className="text-success">● Active</span>) : (<span className="text-primary">● Pending</span>)}</p>
           </div>
+          <Button variant="ghost" size="icon" onClick={onRemove} className="text-muted-foreground hover:text-destructive h-8 w-8">
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{description}</p>
         <div className="flex gap-2 mt-4">
-          {primaryLink && (<Button variant="default" size="sm" className="flex-1" asChild><a href={primaryLink} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" /> Open</a></Button>)}
-          <Button variant="ghost" size="sm" onClick={onRemove} className="text-destructive hover:text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button>
+          {primaryLink && (<Button variant="default" size="sm" className="flex-1" asChild><a href={primaryLink} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4 mr-1" /> Open</a></Button>)}
+          {onDetails && (<Button variant="outline" size="sm" onClick={onDetails}><Info className="w-4 h-4" /></Button>)}
         </div>
       </CardContent>
     </Card>

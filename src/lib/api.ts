@@ -69,9 +69,19 @@ export interface UpdateServicePayload {
   secrets?: Record<string, unknown>;
 }
 
-// API helpers
+// API helpers - Simple logging for debugging
+function log(prefix: string, message: string, data?: unknown) {
+  const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+  if (data) {
+    console.log(`[${timestamp}] ${prefix} ${message}`, typeof data === 'object' ? JSON.stringify(data) : data);
+  } else {
+    console.log(`[${timestamp}] ${prefix} ${message}`);
+  }
+}
+
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = authProvider.getToken();
+  const method = options.method || 'GET';
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -79,17 +89,26 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     ...options.headers,
   };
 
+  const requestBody = options.body ? JSON.parse(options.body as string) : undefined;
+  log('→', `${method} ${endpoint}`, requestBody);
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`API Error: ${response.status} - ${error}`);
+    const errorText = await response.text();
+    let errorJson;
+    try { errorJson = JSON.parse(errorText); } catch { errorJson = null; }
+    
+    log('✗', `${response.status} ${endpoint}`, errorJson || errorText);
+    throw new Error(`API Error: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  log('✓', `${response.status} ${endpoint}`);
+  return data;
 }
 
 // API methods
