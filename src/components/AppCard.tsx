@@ -4,7 +4,7 @@ import { ServiceProvider } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Info } from 'lucide-react';
+import { Plus, Check, Info } from 'lucide-react';
 
 interface AppCardProps {
   provider: ServiceProvider;
@@ -14,28 +14,21 @@ interface AppCardProps {
 }
 
 export function AppCard({ provider, isEnabled, onToggle, onDetails }: AppCardProps) {
-  // Generate tags based on provider metadata
-  const tags: string[] = [];
-  if (provider.category) {
-    tags.push(provider.category);
-  }
-  // Could add more logic here based on provider properties
-
   return (
-    <Card className="flex flex-col h-full hover:border-gray-700 transition-colors">
+    <Card className={`flex flex-col h-full transition-all ${isEnabled ? 'ring-2 ring-primary shadow-md' : 'hover:shadow-md'}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
           {provider.iconUrl ? (
             <img
               src={provider.iconUrl}
               alt={provider.displayName}
-              className="w-12 h-12 rounded-lg object-contain bg-gray-800 p-2"
+              className="w-12 h-12 rounded-lg object-contain bg-muted p-2"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           ) : (
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-600 to-violet-800 flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
               {provider.displayName.charAt(0)}
             </div>
           )}
@@ -45,47 +38,44 @@ export function AppCard({ provider, isEnabled, onToggle, onDetails }: AppCardPro
               {provider.category} • v{provider.version}
             </CardDescription>
           </div>
+          {isEnabled && (
+            <Badge variant="success" className="shrink-0">Added</Badge>
+          )}
         </div>
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col gap-3">
-        <p className="text-sm text-gray-400 line-clamp-3 flex-1">
+        <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
           {provider.description}
         </p>
         
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
+        {provider.category && (
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="outline" className="text-xs">{provider.category}</Badge>
+          </div>
+        )}
         
-        {/* Actions */}
         <div className="flex gap-2 mt-auto pt-2">
-          <Button
-            onClick={onToggle}
-            variant={isEnabled ? 'success' : 'default'}
-            className="flex-1"
+          <Button 
+            onClick={onToggle} 
+            variant={isEnabled ? 'outline' : 'default'} 
+            className="flex-1" 
             size="sm"
           >
             {isEnabled ? (
               <>
                 <Check className="w-4 h-4" />
-                Enabled
+                In Project
               </>
             ) : (
-              'Enable'
+              <>
+                <Plus className="w-4 h-4" />
+                Add to Project
+              </>
             )}
           </Button>
-          <Button
-            onClick={onDetails}
-            variant="outline"
-            size="sm"
-          >
+          <Button onClick={onDetails} variant="ghost" size="sm">
             <Info className="w-4 h-4" />
-            Details
           </Button>
         </div>
       </CardContent>

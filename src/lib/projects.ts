@@ -64,7 +64,7 @@ export async function activateProject(
   for (const provider of enabledProviders) {
     try {
       const payload: DeployServicePayload = {
-        name: `${project.name}-${provider.name}`,
+        name: `[OPENAPPS] [${project.name}]-${provider.name}`,
         provider: provider.name,
         providerVersion: provider.version,
         plan: { id: 0 },
@@ -137,7 +137,7 @@ export async function addServiceToProject(
   
   try {
     const payload: DeployServicePayload = {
-      name: `${project.name}-${provider.name}`,
+      name: `[OPENAPPS] [${project.name}]-${provider.name}`,
       provider: provider.name,
       providerVersion: provider.version,
       plan: { id: 0 },

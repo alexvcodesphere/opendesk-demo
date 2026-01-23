@@ -1,38 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  /* Dark theme - OpenApps inspired */
-  --background: #0a0a0f;
-  --background-secondary: #111118;
-  --card-bg: #1a1a24;
-  --card-border: #2a2a3a;
+@theme {
+  /* shadcn CSS variables for theming */
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(222.2 84% 4.9%);
   
-  /* Accent colors */
-  --accent-primary: #8b5cf6;
-  --accent-primary-light: #a78bfa;
-  --accent-primary-dark: #7c3aed;
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222.2 84% 4.9%);
   
-  /* Status colors */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(222.2 84% 4.9%);
   
-  /* Text colors */
-  --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --color-primary: hsl(262.1 83.3% 57.8%);
+  --color-primary-foreground: hsl(210 40% 98%);
   
-  /* Legacy gov colors (for compatibility) */
-  --gov-primary: #8b5cf6;
-  --gov-primary-light: #a78bfa;
-  --gov-primary-dark: #7c3aed;
-  --gov-accent: #22c55e;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  --color-secondary: hsl(210 40% 96.1%);
+  --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
+  
+  --color-muted: hsl(210 40% 96.1%);
+  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
+  
+  --color-accent: hsl(210 40% 96.1%);
+  --color-accent-foreground: hsl(222.2 47.4% 11.2%);
+  
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  
+  --color-success: hsl(142.1 76.2% 36.3%);
+  --color-success-foreground: hsl(355.7 100% 97.3%);
+  
+  --color-border: hsl(214.3 31.8% 91.4%);
+  --color-input: hsl(214.3 31.8% 91.4%);
+  --color-ring: hsl(262.1 83.3% 57.8%);
+  
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
 }
 
 html,
@@ -43,114 +46,13 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--text-primary);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 a {
   color: inherit;
   text-decoration: none;
-}
-
-/* Animations */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* shadcn animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes zoomIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes zoomOut {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(0.95); opacity: 0; }
-}
-
-@keyframes slideInFromTop {
-  from { transform: translateY(-2%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes slideInFromBottom {
-  from { transform: translateY(2%); }
-  to { transform: translateY(0); }
-}
-
-/* Tailwind animation utilities for shadcn */
-.animate-in {
-  animation-duration: 150ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  animation-fill-mode: forwards;
-}
-
-.fade-in-0 {
-  animation-name: fadeIn;
-}
-
-.zoom-in-95 {
-  animation-name: zoomIn;
-}
-
-.slide-in-from-top-2 {
-  animation-name: slideInFromTop;
-}
-
-.slide-in-from-bottom-2 {
-  animation-name: slideInFromBottom;
-}
-
-.animate-out {
-  animation-duration: 150ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  animation-fill-mode: forwards;
-}
-
-.fade-out-0 {
-  animation-name: fadeOut;
-}
-
-.zoom-out-95 {
-  animation-name: zoomOut;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--card-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
 }
 
 /* Toast notifications */
@@ -159,25 +61,17 @@ a {
   bottom: 1.5rem;
   right: 1.5rem;
   padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   z-index: 50;
 }
 
 .toast-success {
-  background: var(--success);
-  color: white;
+  background-color: var(--color-success);
+  color: var(--color-success-foreground);
 }
 
 .toast-error {
-  background: var(--error);
-  color: white;
-}
-
-/* Focus ring utility */
-.focus-ring:focus-visible {
-  outline: none;
-  ring: 2px solid var(--accent-primary);
-  ring-offset: 2px;
-  ring-offset-color: var(--background);
+  background-color: var(--color-destructive);
+  color: var(--color-destructive-foreground);
 }
